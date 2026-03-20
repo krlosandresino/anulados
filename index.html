@@ -2,311 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>✅ Verificador Anulados</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 Claims Reclamos</title>
     <style>
-        /* TU DISEÑO ORIGINAL EXACTO */
-        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background-color: #f0f2f5; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
-        h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-top: 0; }
-        .config-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6; }
-        .scan-section { text-align: center; padding: 20px; border: 2px solid #e9ecef; border-radius: 10px; }
-        input[type="text"], input[type="password"], input[type="number"] { width: 90%; padding: 15px; font-size: 24px; border: 2px solid #1a73e8; border-radius: 8px; text-align: center; margin-bottom: 10px; }
-        .stats { display: flex; justify-content: space-around; margin: 20px 0; }
-        .stat-box { padding: 15px; border-radius: 8px; width: 40%; color: white; font-weight: bold; }
-        .goal { background-color: #6c757d; }
-        .current { background-color: #007bff; }
-        #mensaje { margin: 20px 0; padding: 20px; border-radius: 8px; font-size: 1.2em; font-weight: bold; }
-        .match { background-color: #28a745; color: white; }
-        .danger { background-color: #dc3545; color: white; }
-        .info { background-color: #e7f3ff; color: #004085; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; background-color: #17a2b8; margin-top: 10px; }
-
-        #statusDot { position: absolute; top: 25px; right: 25px; width: 12px; height: 12px; border-radius: 50%; background: #ccc; }
-        .online { background: #28a745 !important; }
-        .offline { background: #dc3545 !important; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal { background: white; padding: 25px; border-radius: 10px; text-align: center; width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .progress-bar-wrap { width: 100%; background: #eee; height: 10px; border-radius: 5px; margin-bottom: 15px; overflow: hidden; display: none; }
-        #pBar { background: #1a73e8; height: 100%; width: 0%; transition: 0.3s; }
-        
-        .adv-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; font-size: 0.85em; color: #555; }
-        .adv-item { background: #f8f9fa; padding: 8px; border-radius: 5px; border: 1px solid #eee; }
+        :root { --primary: #2563eb; --secondary: #64748b; --dark: #0f172a; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); color: var(--dark); margin: 0; padding: 40px 20px; }
+        .container { max-width: 900px; margin: auto; }
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--dark); }
+        p { color: var(--secondary); font-size: 1.1rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 1px solid #e2e8f0; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1); }
+        .icon { font-size: 2.5rem; margin-bottom: 15px; }
+        .card span { font-weight: 600; font-size: 1.1rem; color: var(--primary); }
+        footer { margin-top: 60px; text-align: center; font-size: 0.9rem; color: var(--secondary); }
     </style>
 </head>
 <body>
-
-<div id="modalOp" class="overlay">
-    <div class="modal">
-        <h3>Nombre del Operario</h3>
-        <input type="text" id="nombreOperario" placeholder="Responsable" style="font-size: 20px;">
-        <button class="btn" onclick="iniciarApp()">Registrarse</button>
-    </div>
-</div>
-
-<div id="modalAdmin" class="overlay" style="display:none;">
-    <div class="modal">
-        <h3>Acceso Administrador</h3>
-        <input type="text" id="adminUser" placeholder="Usuario" style="font-size: 18px;">
-        <input type="password" id="adminPass" placeholder="Clave" style="font-size: 18px;">
-        <button class="btn" style="background:#1a73e8" onclick="validarAdmin()">Subir Base de Datos</button>
-        <button class="btn" style="background:#6c757d" onclick="cancelarAdmin()">Cancelar</button>
-    </div>
-</div>
-
 <div class="container">
-    <div id="statusDot"></div>
-    <h2>🛃 Control de pedidos/reclamos</h2>
-
-    <div class="config-section">
-        <strong>1. Cargar archivo excel</strong><br>
-        <input type="file" id="uploadExcel" accept=".xlsx, .xls" style="margin-top:10px;">
+    <header>
+        <h1>PEDIDOS ANULADOS</h1>
+        <p>Control administrativo</p>
+    </header>
+    <div class="grid">
+        <a href="admin.html" class="card">
+            <div class="icon">🗄️</div>
+            <span>Administrador</span>
+        </a>
+        <a href="anulados.html" class="card">
+            <div class="icon">📦</div>
+            <span>Operarios</span>
+        </a>
     </div>
-
-    <div class="scan-section">
-        <div id="infoOp" style="text-align: right; color: #666; font-size: 0.8em; margin-bottom: 5px;"></div>
-        <div class="progress-bar-wrap" id="wrapBar"><div id="pBar"></div></div>
-        
-        <input type="text" id="scannerInput" 
-               inputmode="numeric" 
-               pattern="[0-9]*" 
-               oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
-               placeholder="ESCANEE AQUÍ..." disabled>
-
-        <input type="number" id="quantityInput" 
-               placeholder="CANTIDAD" 
-               min="1" disabled>
-        
-        <div class="stats">
-            <div class="stat-box goal">Sistema: <span id="metaCant">0</span></div>
-            <div class="stat-box current">Escaneado: <span id="actualCant">0</span></div>
-        </div>
-
-        <div class="adv-stats">
-            <div class="adv-item">✅ Cuadrados: <span id="countOK">0</span></div>
-            <div class="adv-item">⚠️ Faltantes: <span id="countGap">0</span></div>
-            <div class="adv-item">🚫 No tocados: <span id="countNew">0</span></div>
-            <div class="adv-item">⬆️ Sobrantes: <span id="countOver">0</span></div>
-        </div>
-
-        <div id="mensaje" class="info">Conectando con la nube...</div>
-    </div>
-
-    <button class="btn" onclick="descargarReporte()">📥 Descargar Reporte General</button>
+    <footer>&copy; 2026 Creado por Carlos Burgos</footer>
 </div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, updateDoc, increment, getDocs, collection, writeBatch, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyDOPmWV9pKa0NZCh6BZb46fea8QigvN8vI",
-        authDomain: "anulados-7a9b8.firebaseapp.com",
-        projectId: "anulados-7a9b8",
-        storageBucket: "anulados-7a9b8.firebasestorage.app",
-        messagingSenderId: "296934856812",
-        appId: "1:296934856812:web:1fc755633ceddd28712049"
+<script>
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.onkeydown = e => {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && (e.keyCode == 85 || e.keyCode == 83))) return false;
     };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    let baseLocal = {};
-    let opNombre = "";
-    let fileToUpload = null;
-
-    const input = document.getElementById('scannerInput');
-    const qInput = document.getElementById('quantityInput');
-    const msg = document.getElementById('mensaje');
-
-    document.getElementById('nombreOperario').addEventListener('keypress', (e) => { if(e.key === 'Enter') iniciarApp(); });
-    document.getElementById('adminUser').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('adminPass').focus(); });
-    document.getElementById('adminPass').addEventListener('keypress', (e) => { if(e.key === 'Enter') validarAdmin(); });
-
-    window.iniciarApp = () => {
-        opNombre = document.getElementById('nombreOperario').value.trim();
-        if(opNombre === "") return alert("Ingrese su nombre");
-        document.getElementById('modalOp').style.display = 'none';
-        document.getElementById('infoOp').innerText = "Responsable: " + opNombre;
-        input.disabled = false;
-        qInput.disabled = false;
-        input.focus();
-    }
-
-    document.getElementById('uploadExcel').addEventListener('change', (e) => {
-        if(e.target.files[0]) {
-            fileToUpload = e.target.files[0];
-            document.getElementById('modalAdmin').style.display = 'flex';
-            document.getElementById('adminUser').focus();
-        }
-    });
-
-    window.cancelarAdmin = () => {
-        document.getElementById('modalAdmin').style.display = 'none';
-        document.getElementById('uploadExcel').value = "";
-    }
-
-    window.validarAdmin = async () => {
-        const u = document.getElementById('adminUser').value;
-        const p = document.getElementById('adminPass').value;
-        if(u === "oriflame" && p === "2026") {
-            document.getElementById('modalAdmin').style.display = 'none';
-            await subirBase(fileToUpload);
-        } else { alert("Usuario o Clave incorrectos"); }
-    }
-
-    async function subirBase(file) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
-            
-            msg.innerText = "⏳ Limpiando datos antiguos...";
-            const snap = await getDocs(collection(db, "pedidos"));
-            let batchDel = writeBatch(db);
-            let countDel = 0;
-            for (const dSnap of snap.docs) {
-                batchDel.delete(dSnap.ref);
-                countDel++;
-                if (countDel >= 450) { await batchDel.commit(); batchDel = writeBatch(db); countDel = 0; }
-            }
-            if (countDel > 0) await batchDel.commit();
-
-            msg.innerText = "⏳ Sincronizando nueva base...";
-            let batchWrite = writeBatch(db);
-            let countWrite = 0;
-            let total = 0;
-
-            for(let row of rows) {
-                let c = String(row[0] || "").trim();
-                let q = parseFloat(row[6]);
-                let pos = String(row[4] || "SIN UBICACION").trim(); 
-                
-                if(c && !isNaN(q)) {
-                    batchWrite.set(doc(db, "pedidos", c), { m: q, a: 0, p: pos, ops: [] });
-                    countWrite++;
-                    total++;
-                }
-                if(countWrite >= 450) { 
-                    await batchWrite.commit(); 
-                    batchWrite = writeBatch(db); 
-                    countWrite = 0; 
-                    msg.innerText = `⏳ Subiendo... (${total})`;
-                }
-            }
-            if(countWrite > 0) await batchWrite.commit();
-            msg.innerText = `✅ Base cargada: ${total} registros.`;
-            msg.className = "match";
-            document.getElementById('uploadExcel').value = "";
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-    onSnapshot(collection(db, "pedidos"), (snapshot) => {
-        let tM = 0, tA = 0, cOK = 0, cGap = 0, cNew = 0, cOver = 0;
-        snapshot.forEach(doc => {
-            const d = doc.data();
-            baseLocal[doc.id] = d;
-            tM += d.m; tA += d.a;
-            if (d.a === 0) cNew++;
-            else if (d.a === d.m) cOK++;
-            else if (d.a < d.m) cGap++;
-            else cOver++;
-        });
-        if(tM > 0) {
-            document.getElementById('wrapBar').style.display = 'block';
-            document.getElementById('pBar').style.width = (tA/tM*100) + "%";
-            document.getElementById('countOK').innerText = cOK;
-            document.getElementById('countGap').innerText = cGap;
-            document.getElementById('countNew').innerText = cNew;
-            document.getElementById('countOver').innerText = cOver;
-        }
-    });
-
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            if(input.value.trim() !== "") {
-                qInput.focus();
-            }
-        }
-    });
-
-    qInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            procesarEscaneo();
-        }
-    });
-
-    function procesarEscaneo() {
-        const cod = input.value.trim();
-        // Si está vacío, asume 1
-        const cant = parseInt(qInput.value) || 1;
-        
-        if(!cod) {
-            input.focus();
-            return;
-        }
-
-        const item = baseLocal[cod];
-        if(!item) {
-            actualizarUI(`❌ Código [${cod}] no existe.`, "danger", 0, 0);
-        } else {
-            item.a += cant;
-            let cl = "info";
-            let tx = `Contando... ${cod} (+${cant}) | Ubicación: ${item.p}`;
-            
-            if (item.a === item.m) { cl = "match"; tx = `✅ ¡CUADRADO! ${cod} | Ubicación: ${item.p}`; }
-            else if (item.a > item.m) { cl = "danger"; tx = `⚠️ ¡SOBRANTE! ${cod} | Ubicación: ${item.p}`; }
-            
-            actualizarUI(tx, cl, item.m, item.a);
-            updateDoc(doc(db, "pedidos", cod), { a: increment(cant), ops: arrayUnion(opNombre) });
-        }
-        
-        input.value = "";
-        qInput.value = ""; // Limpia el campo para el siguiente
-        input.focus();
-    }
-
-    function actualizarUI(t, c, m, a) {
-        msg.innerText = t; msg.className = c;
-        document.getElementById('metaCant').innerText = m;
-        document.getElementById('actualCant').innerText = a;
-    }
-
-    window.descargarReporte = async () => {
-        let detalle = [["CÓDIGO", "UBICACIÓN", "SISTEMA", "ESCANEADO", "DIFERENCIA", "ESTADO", "OPERARIOS"]];
-        let resumen = [["RESUMEN AUDITORÍA", ""], ["Fecha", new Date().toLocaleString()], ["", ""], ["CATEGORÍA", "CANT"], ["Total", 0], ["OK", 0], ["Faltante", 0], ["Sobrante", 0], ["No Iniciado", 0]];
-        const snap = await getDocs(collection(db, "pedidos"));
-        snap.forEach(doc => {
-            const r = doc.data();
-            const dif = r.a - r.m;
-            let est = "";
-            resumen[4][1]++;
-            if (r.a === 0) { est = "NO PITADO"; resumen[8][1]++; }
-            else if (r.a < r.m) { est = "FALTANTE"; resumen[6][1]++; }
-            else if (r.a === r.m) { est = "CUADRADO"; resumen[5][1]++; }
-            else { est = "SOBRANTE"; resumen[7][1]++; }
-            detalle.push([doc.id, r.p, r.m, r.a, dif, est, r.ops.join(", ")]);
-        });
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(detalle), "Detalle");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), "Resumen");
-        XLSX.writeFile(wb, "Reporte Return.xlsx");
-    }
-
-    const dot = document.getElementById('statusDot');
-    const upDot = () => dot.className = navigator.onLine ? 'online' : 'offline';
-    window.addEventListener('online', upDot); window.addEventListener('offline', upDot);
-    upDot();
-    
-    document.addEventListener('click', (e) => { 
-        if(document.getElementById('modalOp').style.display === 'none' && 
-           document.getElementById('modalAdmin').style.display === 'none' &&
-           e.target.id !== 'quantityInput' && e.target.id !== 'uploadExcel') {
-            input.focus(); 
-        }
-    });
 </script>
 </body>
 </html>
