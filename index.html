@@ -67,7 +67,11 @@
         <div id="infoOp" style="text-align: right; color: #666; font-size: 0.8em; margin-bottom: 5px;"></div>
         <div class="progress-bar-wrap" id="wrapBar"><div id="pBar"></div></div>
         
-        <input type="text" id="scannerInput" placeholder="ESCANEE AQUÍ..." disabled>
+        <input type="text" id="scannerInput" 
+               inputmode="numeric" 
+               pattern="[0-9]*" 
+               oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
+               placeholder="ESCANEE AQUÍ..." disabled>
         
         <div class="stats">
             <div class="stat-box goal">Sistema: <span id="metaCant">0</span></div>
@@ -110,7 +114,6 @@
     const input = document.getElementById('scannerInput');
     const msg = document.getElementById('mensaje');
 
-    // EVENTOS ENTER RESTAURADOS
     document.getElementById('nombreOperario').addEventListener('keypress', (e) => { if(e.key === 'Enter') iniciarApp(); });
     document.getElementById('adminUser').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('adminPass').focus(); });
     document.getElementById('adminPass').addEventListener('keypress', (e) => { if(e.key === 'Enter') validarAdmin(); });
@@ -155,14 +158,14 @@
             
             msg.innerText = "⏳ Limpiando datos antiguos...";
             const snap = await getDocs(collection(db, "pedidos"));
-            let batchDelete = writeBatch(db);
+            let batchDel = writeBatch(db);
             let countDel = 0;
-            for (const docSnap of snap.docs) {
-                batchDelete.delete(docSnap.ref);
+            for (const dSnap of snap.docs) {
+                batchDel.delete(dSnap.ref);
                 countDel++;
-                if (countDel >= 450) { await batchDelete.commit(); batchDelete = writeBatch(db); countDel = 0; }
+                if (countDel >= 450) { await batchDel.commit(); batchDel = writeBatch(db); countDel = 0; }
             }
-            if (countDel > 0) await batchDelete.commit();
+            if (countDel > 0) await batchDel.commit();
 
             msg.innerText = "⏳ Sincronizando nueva base...";
             let batchWrite = writeBatch(db);
@@ -172,7 +175,7 @@
             for(let row of rows) {
                 let c = String(row[0] || "").trim();
                 let q = parseFloat(row[6]);
-                let pos = String(row[4] || "SIN UBICACION").trim(); // Captura Columna 5
+                let pos = String(row[4] || "SIN UBICACION").trim(); 
                 
                 if(c && !isNaN(q)) {
                     batchWrite.set(doc(db, "pedidos", c), { m: q, a: 0, p: pos, ops: [] });
@@ -225,7 +228,6 @@
             } else {
                 item.a++;
                 let cl = "info";
-                // AHORA SE MUESTRA LA UBICACIÓN (item.p) EN PANTALLA
                 let tx = `Contando... ${cod} | Ubicación: ${item.p}`;
                 if (item.a === item.m) { cl = "match"; tx = `✅ ¡CUADRADO! ${cod} | Ubicación: ${item.p}`; }
                 else if (item.a > item.m) { cl = "danger"; tx = `⚠️ ¡SOBRANTE! ${cod} | Ubicación: ${item.p}`; }
