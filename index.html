@@ -11,7 +11,7 @@
         h2 { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; margin-top: 0; }
         .config-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6; }
         .scan-section { text-align: center; padding: 20px; border: 2px solid #e9ecef; border-radius: 10px; }
-        input[type="text"], input[type="password"] { width: 90%; padding: 15px; font-size: 24px; border: 2px solid #1a73e8; border-radius: 8px; text-align: center; margin-bottom: 10px; }
+        input[type="text"], input[type="password"], input[type="number"] { width: 90%; padding: 15px; font-size: 24px; border: 2px solid #1a73e8; border-radius: 8px; text-align: center; margin-bottom: 10px; }
         .stats { display: flex; justify-content: space-around; margin: 20px 0; }
         .stat-box { padding: 15px; border-radius: 8px; width: 40%; color: white; font-weight: bold; }
         .goal { background-color: #6c757d; }
@@ -72,6 +72,10 @@
                pattern="[0-9]*" 
                oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
                placeholder="ESCANEE AQUÍ..." disabled>
+
+        <input type="number" id="quantityInput" 
+               placeholder="CANTIDAD" 
+               min="1" value="1" disabled>
         
         <div class="stats">
             <div class="stat-box goal">Sistema: <span id="metaCant">0</span></div>
@@ -112,6 +116,7 @@
     let fileToUpload = null;
 
     const input = document.getElementById('scannerInput');
+    const qInput = document.getElementById('quantityInput');
     const msg = document.getElementById('mensaje');
 
     document.getElementById('nombreOperario').addEventListener('keypress', (e) => { if(e.key === 'Enter') iniciarApp(); });
@@ -124,6 +129,7 @@
         document.getElementById('modalOp').style.display = 'none';
         document.getElementById('infoOp').innerText = "Responsable: " + opNombre;
         input.disabled = false;
+        qInput.disabled = false;
         input.focus();
     }
 
@@ -218,26 +224,51 @@
         }
     });
 
+    // Manejo de saltos entre campos
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            const cod = input.value.trim();
-            if(!cod) return;
-            const item = baseLocal[cod];
-            if(!item) {
-                actualizarUI(`❌ Código [${cod}] no existe.`, "danger", 0, 0);
-            } else {
-                item.a++;
-                let cl = "info";
-                let tx = `Contando... ${cod} | Ubicación: ${item.p}`;
-                if (item.a === item.m) { cl = "match"; tx = `✅ ¡CUADRADO! ${cod} | Ubicación: ${item.p}`; }
-                else if (item.a > item.m) { cl = "danger"; tx = `⚠️ ¡SOBRANTE! ${cod} | Ubicación: ${item.p}`; }
-                
-                actualizarUI(tx, cl, item.m, item.a);
-                updateDoc(doc(db, "pedidos", cod), { a: increment(1), ops: arrayUnion(opNombre) });
+            if(input.value.trim() !== "") {
+                qInput.focus();
+                qInput.select();
             }
-            input.value = "";
         }
     });
+
+    qInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            procesarEscaneo();
+        }
+    });
+
+    function procesarEscaneo() {
+        const cod = input.value.trim();
+        const cant = parseInt(qInput.value) || 1;
+        
+        if(!cod) {
+            input.focus();
+            return;
+        }
+
+        const item = baseLocal[cod];
+        if(!item) {
+            actualizarUI(`❌ Código [${cod}] no existe.`, "danger", 0, 0);
+        } else {
+            // Actualizamos localmente para feedback inmediato
+            item.a += cant;
+            let cl = "info";
+            let tx = `Contando... ${cod} (+${cant}) | Ubicación: ${item.p}`;
+            
+            if (item.a === item.m) { cl = "match"; tx = `✅ ¡CUADRADO! ${cod} | Ubicación: ${item.p}`; }
+            else if (item.a > item.m) { cl = "danger"; tx = `⚠️ ¡SOBRANTE! ${cod} | Ubicación: ${item.p}`; }
+            
+            actualizarUI(tx, cl, item.m, item.a);
+            updateDoc(doc(db, "pedidos", cod), { a: increment(cant), ops: arrayUnion(opNombre) });
+        }
+        
+        input.value = "";
+        qInput.value = "1";
+        input.focus();
+    }
 
     function actualizarUI(t, c, m, a) {
         msg.innerText = t; msg.className = c;
@@ -270,7 +301,14 @@
     const upDot = () => dot.className = navigator.onLine ? 'online' : 'offline';
     window.addEventListener('online', upDot); window.addEventListener('offline', upDot);
     upDot();
-    document.addEventListener('click', () => { if(document.getElementById('modalOp').style.display === 'none' && document.getElementById('modalAdmin').style.display === 'none') input.focus(); });
+    
+    document.addEventListener('click', (e) => { 
+        if(document.getElementById('modalOp').style.display === 'none' && 
+           document.getElementById('modalAdmin').style.display === 'none' &&
+           e.target.id !== 'quantityInput' && e.target.id !== 'uploadExcel') {
+            input.focus(); 
+        }
+    });
 </script>
 </body>
 </html>
