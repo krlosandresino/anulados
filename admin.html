@@ -22,33 +22,55 @@
         .login-card h2 { margin-bottom: 20px; color: #1a73e8; }
         .login-card input {
             width: 100%; padding: 12px; margin: 10px 0;
-            border: 2px solid #e9ecef; border-radius: 8px; outline: none;
-            box-sizing: border-box; font-size: 16px;
+            border: 2px solid #e9ecef; border-radius: 8px;
+            outline: none; box-sizing: border-box; font-size: 16px;
         }
-        .login-card input:focus { border-color: #1a73e8; }
         .btn-login {
-            width: 100%; background: #1a73e8; color: white; border: none;
-            padding: 12px; border-radius: 8px; cursor: pointer;
-            font-weight: bold; font-size: 16px; margin-top: 10px;
+            width: 100%; background: #1a73e8; color: white;
+            border: none; padding: 12px; border-radius: 8px;
+            cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px;
         }
-        /* ------------------------- */
 
-        .nav { background: #1a73e8; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* --- LAYOUT PRINCIPAL --- */
+        .nav {
+            background: #1a73e8; color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         .container { padding: 20px; max-width: 1250px; margin: auto; }
-        
-        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center; }
+
+        .grid-stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px; margin-bottom: 20px;
+        }
+        .card {
+            background: white; padding: 15px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); text-align: center;
+        }
         .card h3 { margin: 0; font-size: 0.85em; color: #666; text-transform: uppercase; }
         .card .val { font-size: 2em; font-weight: bold; margin: 5px 0; }
-        
+
+        /* Colores de estados */
         .bg-ok { border-bottom: 5px solid #28a745; color: #28a745; }
         .bg-gap { border-bottom: 5px solid #ffc107; color: #856404; }
         .bg-error { border-bottom: 5px solid #dc3545; color: #dc3545; }
         .bg-neutral { border-bottom: 5px solid #6c757d; color: #343a40; }
 
-        .progress-wrapper { background: #e9ecef; border-radius: 10px; height: 25px; margin-bottom: 5px; overflow: hidden; border: 1px solid #dee2e6; }
-        .progress-fill { background: linear-gradient(90deg, #1a73e8, #00c6ff); height: 100%; width: 0%; transition: width 0.8s ease; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px; }
-        .progress-info { font-size: 12px; color: #666; margin-bottom: 20px; font-weight: bold; text-align: right; display: block; }
+        /* Barra de progreso */
+        .progress-wrapper {
+            background: #e9ecef; border-radius: 10px; height: 25px;
+            margin-bottom: 5px; overflow: hidden; border: 1px solid #dee2e6;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #1a73e8, #00c6ff);
+            height: 100%; width: 0%; transition: width 0.8s ease;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 13px;
+        }
+        .progress-info {
+            font-size: 12px; color: #666; margin-bottom: 20px;
+            font-weight: bold; text-align: right; display: block;
+        }
 
         .main-content { display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px; align-items: start; }
         .panel { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -58,13 +80,14 @@
         thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         th { text-align: left; padding: 12px; font-size: 0.85em; border-bottom: 2px solid #dee2e6; }
         td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.85em; }
-        
+
+        /* Botones */
         .btn-reporte { background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-danger { background: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .btn-upload { background: #ffc107; color: #333; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div id="loginOverlay">
     <div class="login-card">
@@ -80,8 +103,8 @@
     <div style="display: flex; align-items: center; gap: 10px;">
         <input type="file" id="uploadExcel" accept=".xlsx, .xls" style="display:none;">
         <button class="btn-upload" onclick="document.getElementById('uploadExcel').click()">📤 CARGAR EXCEL</button>
-        <button class="btn-danger" onclick="limpiarBaseSeguro()">🗑️ LIMPIAR SISTEMA</button>
-        <button class="btn-reporte" onclick="descargarReporte()">📥 DESCARGAR REPORTE</button>
+        <button class="btn-danger" id="btnLimpiar">🗑️ LIMPIAR SISTEMA</button>
+        <button class="btn-reporte" id="btnReporte">📥 DESCARGAR REPORTE</button>
         <span id="reloj" style="font-family: monospace; margin-left:10px;"></span>
     </div>
 </div>
@@ -94,9 +117,7 @@
         <div class="card bg-error"><h3>Unit. Sobrantes</h3><div class="val" id="stat-over">0</div></div>
     </div>
 
-    <div class="progress-wrapper">
-        <div id="bar-fill" class="progress-fill">0%</div>
-    </div>
+    <div class="progress-wrapper"><div id="bar-fill" class="progress-fill">0%</div></div>
     <span class="progress-info">Faltan por procesar: <span id="skus-restantes">0</span> SKUs</span>
 
     <div class="main-content">
@@ -128,141 +149,134 @@
 </div>
 
 <script>
-    // LÓGICA DE LOGIN
-    function validarAcceso() {
-        const user = document.getElementById('userInput').value.toLowerCase();
-        const pass = document.getElementById('passInput').value;
+    document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) return false; };
 
-        if (user === "oriflame" && pass === "2026") {
+    function validarAcceso() {
+        const u = document.getElementById('userInput').value.toLowerCase();
+        const p = document.getElementById('passInput').value;
+        if (u === "oriflame" && p === "2026") {
             document.getElementById('loginOverlay').style.display = 'none';
         } else {
             alert("Credenciales incorrectas");
         }
     }
 
-    // MANEJO DEL TECLA ENTER
-    document.getElementById('userInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') document.getElementById('passInput').focus();
-    });
+    document.getElementById('userInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('passInput').focus(); });
+    document.getElementById('passInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') validarAcceso(); });
 
-    document.getElementById('passInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') validarAcceso();
-    });
+    setInterval(() => {
+        document.getElementById('reloj').innerText = new Date().toLocaleTimeString();
+    }, 1000);
 </script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, getDocs, doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDOPmWV9pKa0NZCh6BZb46fea8QigvN8vI",
-        authDomain: "anulados-7a9b8.firebaseapp.com",
-        projectId: "anulados-7a9b8",
-        storageBucket: "anulados-7a9b8.firebasestorage.app",
-        messagingSenderId: "296934856812",
-        appId: "1:296934856812:web:1fc755633ceddd28712049"
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDOPmWV9pKa0NZCh6BZb46fea8QigvN8vI", 
+        authDomain: "anulados-7a9b8.firebaseapp.com", 
+        projectId: "anulados-7a9b8", 
+        storageBucket: "anulados-7a9b8.firebasestorage.app", 
+        messagingSenderId: "296934856812", 
+        appId: "1:296934856812:web:1fc755633ceddd28712049" 
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     let masterData = [];
 
-    setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleTimeString(); }, 1000);
-
-    // MIGRACIÓN: Lógica de carga de Excel
     document.getElementById('uploadExcel').addEventListener('change', async (e) => {
         const file = e.target.files[0];
-        if(!file) return;
-        
-        const clave = prompt("Para subir base de datos, ingrese clave:");
-        if(clave !== "2026") return alert("Clave incorrecta");
+        if (!file) return;
 
         const status = document.getElementById('loadingStatus');
         const reader = new FileReader();
-        
-        reader.onload = async (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
-            
+
+        reader.onload = async (ev) => {
+            const data = new Uint8Array(ev.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+
             status.innerText = "⏳ Limpiando datos antiguos...";
             const snap = await getDocs(collection(db, "pedidos"));
-            let batchDel = writeBatch(db);
-            let countDel = 0;
-            for (const dSnap of snap.docs) {
-                batchDel.delete(dSnap.ref);
-                countDel++;
-                if (countDel >= 450) { await batchDel.commit(); batchDel = writeBatch(db); countDel = 0; }
+            let batch = writeBatch(db);
+            let count = 0;
+            for (const d of snap.docs) {
+                batch.delete(d.ref);
+                count++;
+                if (count >= 450) { await batch.commit(); batch = writeBatch(db); count = 0; }
             }
-            if (countDel > 0) await batchDel.commit();
+            if (count > 0) await batch.commit();
 
             status.innerText = "⏳ Sincronizando nueva base...";
-            let batchWrite = writeBatch(db);
-            let countWrite = 0;
-            let total = 0;
+            batch = writeBatch(db);
+            count = 0;
+            let totalCargados = 0;
 
-            for(let row of rows) {
-                let c = String(row[0] || "").trim();
-                let q = parseFloat(row[6]);
-                let pos = String(row[4] || "SIN UBICACION").trim(); 
-                
-                if(c && !isNaN(q)) {
-                    batchWrite.set(doc(db, "pedidos", c), { m: q, a: 0, p: pos, ops: [] });
-                    countWrite++;
-                    total++;
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const sku = String(row[0] || "").trim();
+                const meta = parseFloat(row[6]);
+                const ubic = String(row[4] || "N/A").trim();
+
+                if (sku && !isNaN(meta)) {
+                    batch.set(doc(db, "pedidos", sku), { m: meta, a: 0, p: ubic, ops: [] });
+                    count++;
+                    totalCargados++;
                 }
-                if(countWrite >= 450) { 
-                    await batchWrite.commit(); 
-                    batchWrite = writeBatch(db); 
-                    countWrite = 0; 
-                    status.innerText = `⏳ Subiendo... (${total})`;
+
+                if (count >= 450) {
+                    await batch.commit();
+                    batch = writeBatch(db);
+                    count = 0;
+                    status.innerText = `⏳ Subiendo... (${totalCargados})`;
                 }
             }
-            if(countWrite > 0) await batchWrite.commit();
-            status.innerText = `✅ Base cargada: ${total} registros.`;
+            if (count > 0) await batch.commit();
+            status.innerText = `✅ Base cargada: ${totalCargados} registros.`;
             document.getElementById('uploadExcel').value = "";
             setTimeout(() => status.innerText = "", 5000);
         };
         reader.readAsArrayBuffer(file);
     });
 
-    onSnapshot(collection(db, "pedidos"), (snapshot) => {
-        let cOK = 0, cGap = 0, cOver = 0;
-        let skusConLectura = 0;
-        let opsMap = {};
+    onSnapshot(collection(db, "pedidos"), (snap) => {
+        let cOK = 0, cGap = 0, cOver = 0, skusLect = 0, opsMap = {};
         masterData = [];
 
-        snapshot.forEach(doc => {
+        snap.forEach(doc => {
             const d = doc.data();
-            const id = doc.id;
-            let est = "PENDIENTE";
-            let color = "#999";
+            let est = "PENDIENTE", color = "#999";
+
             if (d.a > 0) {
-                skusConLectura++; 
+                skusLect++;
                 if (d.a === d.m) { cOK++; est = "CUADRADO"; color = "#28a745"; }
                 else if (d.a < d.m) { cGap++; est = "FALTANTE"; color = "#ff9800"; }
                 else { cOver++; est = "SOBRANTE"; color = "#dc3545"; }
             }
-            masterData.push({ id, ...d, est, color });
-            if(d.ops) d.ops.forEach(op => opsMap[op] = (opsMap[op] || 0) + 1);
+
+            masterData.push({ id: doc.id, ...d, est, color });
+            if (d.ops) d.ops.forEach(o => opsMap[o] = (opsMap[o] || 0) + 1);
         });
 
-        const totalSKUs = snapshot.size;
-        document.getElementById('stat-total').innerText = totalSKUs;
+        document.getElementById('stat-total').innerText = snap.size;
         document.getElementById('stat-ok').innerText = cOK;
         document.getElementById('stat-gap').innerText = cGap;
         document.getElementById('stat-over').innerText = cOver;
-        const porc = totalSKUs > 0 ? Math.round((skusConLectura / totalSKUs) * 100) : 0;
-        document.getElementById('bar-fill').style.width = porc + "%";
-        document.getElementById('bar-fill').innerText = porc + "%";
-        document.getElementById('skus-restantes').innerText = totalSKUs - skusConLectura;
+
+        const perc = snap.size > 0 ? Math.round((skusLect / snap.size) * 100) : 0;
+        document.getElementById('bar-fill').style.width = perc + "%";
+        document.getElementById('bar-fill').innerText = perc + "%";
+        document.getElementById('skus-restantes').innerText = snap.size - skusLect;
+
         render(masterData);
-        
-        const opDiv = document.getElementById('operatorStats');
-        opDiv.innerHTML = Object.entries(opsMap).sort((a,b)=>b[1]-a[1]).map(([n,c])=>`
-            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #f1f1f1; font-size:14px;">
-                <span>👤 ${n}</span><b>${c} Items</b>
-            </div>`).join('');
+
+        document.getElementById('operatorStats').innerHTML = Object.entries(opsMap)
+            .sort((a, b) => b[1] - a[1])
+            .map(([n, c]) => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #f1f1f1; font-size:14px;"><span>👤 ${n}</span><b>${c} Items</b></div>`)
+            .join('');
     });
 
     function render(data) {
@@ -277,42 +291,62 @@
     }
 
     window.filtrar = () => {
-        const val = document.getElementById('busqueda').value.toLowerCase();
-        render(masterData.filter(d => d.id.toLowerCase().includes(val) || d.p.toLowerCase().includes(val)));
+        const v = document.getElementById('busqueda').value.toLowerCase();
+        render(masterData.filter(d => d.id.toLowerCase().includes(v) || d.p.toLowerCase().includes(v)));
     };
 
-    window.limpiarBaseSeguro = async () => {
-        if (confirm("⚠️ ¿ESTÁS SEGURO? Se borrarán todos los registros.")) {
-            const clave = prompt("Introduce la clave:");
-            if (clave === "2026") {
-                const snap = await getDocs(collection(db, "pedidos"));
-                const batch = writeBatch(db);
-                snap.forEach((d) => batch.delete(d.ref));
-                await batch.commit();
-                alert("✅ Base Limpia.");
+    document.getElementById('btnLimpiar').onclick = async () => {
+        if (confirm("⚠️ ¿BORRAR TODA LA BASE DE DATOS?")) {
+            const status = document.getElementById('loadingStatus');
+            status.innerText = "⏳ Borrando...";
+            const snap = await getDocs(collection(db, "pedidos"));
+            let batch = writeBatch(db);
+            let count = 0;
+            for (const d of snap.docs) {
+                batch.delete(d.ref);
+                count++;
+                if (count >= 450) { await batch.commit(); batch = writeBatch(db); count = 0; }
             }
+            if (count > 0) await batch.commit();
+            status.innerText = "✅ Sistema reiniciado.";
+            setTimeout(() => status.innerText = "", 3000);
         }
     };
 
-    window.descargarReporte = async () => {
+    // --- REPORTE CORREGIDO (ESTRUCTURA ORIGINAL) ---
+    document.getElementById('btnReporte').onclick = async () => {
         let detalle = [["CÓDIGO", "UBICACIÓN", "SISTEMA", "ESCANEADO", "DIFERENCIA", "ESTADO", "OPERARIOS"]];
-        let resumen = [["RESUMEN AUDITORÍA", ""], ["Fecha", new Date().toLocaleString()], [""], ["CATEGORÍA", "CANT"], ["Total SKU", 0], ["Cuadrado", 0], ["Faltante", 0], ["Sobrante", 0], ["No Pitado", 0]];
+        let resumen = [
+            ["RESUMEN AUDITORÍA", ""], 
+            ["Fecha", new Date().toLocaleString()], 
+            [""], 
+            ["CATEGORÍA", "CANT"], 
+            ["Total SKU", 0], 
+            ["Cuadrado", 0], 
+            ["Faltante", 0], 
+            ["Sobrante", 0], 
+            ["No Pitado", 0]
+        ];
+
         const snap = await getDocs(collection(db, "pedidos"));
         snap.forEach(doc => {
             const r = doc.data();
             const dif = r.a - r.m;
             let est = "";
             resumen[4][1]++; 
+
             if (r.a === 0) { est = "NO PITADO"; resumen[8][1]++; }
             else if (r.a < r.m) { est = "FALTANTE"; resumen[6][1]++; }
             else if (r.a === r.m) { est = "CUADRADO"; resumen[5][1]++; }
             else { est = "SOBRANTE"; resumen[7][1]++; }
+
             detalle.push([doc.id, r.p, r.m, r.a, dif, est, r.ops ? r.ops.join(", ") : ""]);
         });
+
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(detalle), "Detalle");
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), "Resumen");
-        XLSX.writeFile(wb, "Reporte Return.xlsx");
+        XLSX.writeFile(wb, "Reporte_Admin_Return.xlsx");
     };
 </script>
 </body>
